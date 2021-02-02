@@ -1,0 +1,430 @@
+#include<iostream>
+#include<string>
+#include<map>
+#include<stack>
+#include<vector>
+#include<iterator>
+using namespace std;
+
+void convert1(int, int);
+void convert2(int, int);
+void convert16(int);//10 -> 16
+void r_convert16(string);
+void Function();
+
+typedef int ElemType;
+class SqStack
+{
+private:
+	ElemType* base;
+	int top;
+	int stacksize;
+public:
+	SqStack(ElemType n)
+	{
+		base = new ElemType[n];
+		top = -1;
+		stacksize = n;
+	}
+	~SqStack()
+	{
+		delete[]base;
+		top = -1;
+		stacksize = 0;
+	}
+	void Push(ElemType e)
+	{
+		if (top == stacksize - 1)
+		{
+			cout << "full stack, cannot in";
+			return;
+		}
+		++top;
+		base[top] = e;
+	}
+	ElemType Pop()
+	{
+		ElemType e;
+		if (top == -1)
+		{
+			throw runtime_error("stack is empty,cannot out!");
+		}
+		e = base[top--];
+		return e;
+	}
+	bool Empty()
+	{
+		return top == -1;
+	}
+};
+
+struct Node
+{
+	ElemType data;
+	Node* next;
+};
+class LinkQueue
+{
+private:
+	Node* front;
+	Node* rear;
+public:
+	LinkQueue()
+	{
+		front = new Node;
+		front->next = NULL;
+		rear = front;
+	}
+	~LinkQueue()
+	{
+		Node* p;
+		while (front != NULL)
+		{
+			p = front;
+			front = front->next;
+			delete p;
+		}
+	}
+	void EnQueue(ElemType e)
+	{
+		Node* s = new Node;
+		s->data = e;
+		s->next = rear->next;
+		rear->next = s;
+		rear = s;
+		if (front->next == NULL)
+			front->next = s;
+	}
+	ElemType DeQueue()
+	{
+		ElemType e;
+		Node* p;
+		if (rear == front)
+		{
+			cout << "下溢";
+			return -1;
+		}
+		p = front->next;
+		e = p->data;
+		front->next = p->next;
+		if (p->next == NULL)
+			rear = front;
+		delete p;
+		return e;
+	}
+	bool Empty()
+	{
+		return front == rear;
+	}
+};
+
+int main()
+{
+	cout << "------------Conversion of number systems------------" << endl;
+	cout << "(1).10 to 2         (2).10 to 8" << endl;
+	cout << "(3).10 to 16        (4).2 to 10" << endl;
+	cout << "(5).8 to 10         (6).16 to 10" << endl;
+	cout << "(7).标准四则运算表达式的计算" << endl;
+	int choice;
+
+	while (1)
+	{
+		cout << "Please input your choice:";
+		cin >> choice;
+		int num;
+		string num2;
+		if (choice == 6)
+		{
+			cout << "number:";
+			cin >> num2;
+		}
+		else if (choice == 7)
+			;
+		else
+		{
+			cout << "number:";
+			cin >> num;
+		}
+
+		switch (choice)
+		{
+		case 1:
+			convert1(num, 2);
+			break;
+		case 2:
+			convert1(num, 8);
+			break;
+		case 3:
+			convert16(num);
+			break;
+		case 4:
+			convert2(num, 2);
+			break;
+		case 5:
+			convert2(num, 8);//八进制转换成十进制
+			break;
+		case 6:
+			r_convert16(num2);
+			break;
+		case 7:
+			Function();
+			break;
+		default:
+			break;
+		}
+		
+		cout << "Again? (1).yes   (2).no" << endl;
+		int judge;
+		cin >> judge;
+		if (judge == 1)
+			continue;
+		else if (judge == 2)
+			break;
+
+	}
+	cout << "The procedure has been ended." << endl;
+	
+	return 0;
+}
+
+void convert1(int n, int d)//10 to d
+{
+	int e;
+	SqStack s(50);
+	while (n)
+	{
+		s.Push(n % d);
+		n = n / d;
+	}
+	cout << "The number transformed to " << d << " system is:";
+	while (!s.Empty())
+	{
+		e = s.Pop();
+		cout << e;
+	}
+	cout << endl;
+}
+
+void convert2(int n, int d)
+{
+	int i;
+	LinkQueue l;
+	int k = n;
+	while (k != 0)
+	{
+		i = k % 10;
+		l.EnQueue(i);
+		k = k / 10;
+	}
+
+	int sum = 0;
+	int j = 0;
+	while (!l.Empty())
+	{
+		i = l.DeQueue();
+		sum += i * pow(d, j++);
+	}
+	cout << "The number transformed to 10 system is:" << sum << endl;
+}
+
+void convert16(int n)
+{
+	SqStack s(50);
+	while (n)
+	{
+		s.Push(n % 16);
+		n /= 16;
+	}
+	
+	cout << "The number transformed to 16 system is:";
+	const string hexdigits = "0123456789ABCDEF";
+	string result;
+	int i;
+	while (1)
+	{
+		try
+		{
+			i = s.Pop();
+		}
+		catch (runtime_error err)
+		{
+			break;
+		}
+    	if (i < hexdigits.size())
+			result += hexdigits[i];
+	}
+
+	cout << result << endl;
+}
+
+void r_convert16(string word)//16 -> 10
+{
+	map<char, int> m = { {'0',0},{'1',1},{'2',2},{'3',3},{'4',4},{'5',5},{'6',6},{'7',7},{'8',8},
+	{'9',9},{'A',10},{'B',11},{'C',12},{'D',13},{'E',14},{'F',15} };
+
+	int sum = 0;
+	int i = 0;
+	for (auto it = word.crbegin(); it != word.crend(); ++it)
+	{
+		sum = sum + m[*it] * pow(16, i++);
+	}
+	cout << "The number transformed to 10 system is:" << sum << endl;
+}
+
+//不需要括号的后缀表达式：逆波兰表达式 后缀表达式
+//
+vector<string> Post_Exp(vector<string>&);
+int priority(string opt)
+{
+	if (opt == "+" || opt == "-")
+		return 1;
+	else if (opt == "*" || opt == "/")
+		return 2;
+	else if (opt == "(")
+		return 0;
+}
+int Post_calculate(vector<string> vec);
+void calculate(stack<int>&, string opt);
+
+void Function()
+{
+	cout << "Please input your expression with space:";
+	vector<string> exp;
+	//istream_iterator<string> in(cin), eof;
+	/*
+	while (in != eof)
+		exp.push_back(*in++);
+		*/
+	string word;
+	while (cin >> word)
+		exp.push_back(word);
+
+	//transforming
+	exp = Post_Exp(exp);
+	for (auto i : exp)
+		cout << i << " ";
+	cout << endl;
+
+	int result = Post_calculate(exp);
+	cout << "Your result is " << result << endl;
+}
+
+vector<string> Post_Exp(vector<string>& vec)
+{
+	stack<string> s;
+	vector<string> vec2;
+
+	for (auto i = 0; i != vec.size(); ++i)
+	{
+		string token = vec[i];
+		if (token == "+" || token == "-" || token == "*" || token == "/")
+		{
+			if (s.size() == 0)
+				s.push(token);
+			else
+			{
+				int token_p = priority(token);
+				int opt_p = priority(s.top());
+				if (token_p > opt_p)
+					s.push(token);
+				else
+				{
+					while (token_p <= opt_p)
+					{
+						vec2.push_back(s.top());
+						s.pop();
+						if (s.size() != 0)
+							opt_p = priority(s.top());
+						else
+							break;
+					}
+					s.push(token);
+				}
+			}
+		}
+		else if (token == "(")
+			s.push(token);
+		else if (token == ")")
+		{
+			while (s.top() != "(")
+			{
+				string t = s.top();
+				vec2.push_back(t);
+				s.pop();
+			}
+			s.pop();
+		}
+		else
+			vec2.push_back(token);
+	}
+
+	while (!s.empty())
+	{
+		vec2.push_back(s.top());
+		s.pop();
+	}
+
+	return vec2;
+}
+
+int Post_calculate(vector<string> vec)
+{
+	stack<int> s;
+
+	for (auto i = 0; i != vec.size(); ++i)
+	{
+		string token = vec[i];
+		if (token == "+" || token == "-" || token == "*" || token == "/")
+		{
+			calculate(s, token);
+		}
+		else
+			s.push(stoi(token));
+	}
+
+	return s.top();
+}
+
+void calculate(stack<int>& s, string opt)
+{
+	if (opt == "+")
+	{
+		int p = s.top();
+		s.pop();
+		int q = s.top();
+		s.pop();
+
+		int result = q + p;
+		s.push(result);
+	}
+	else if (opt == "-")
+	{
+		int p = s.top();
+		s.pop();
+		int q = s.top();
+		s.pop();
+
+		int result = q - p;
+		s.push(result);
+	}
+	else if(opt=="*")
+	{
+		int p = s.top();
+		s.pop();
+		int q = s.top();
+		s.pop();
+
+		int result = q * p;
+		s.push(result);
+	}
+	else
+	{
+		int p = s.top();
+		s.pop();
+		int q = s.top();
+		s.pop();
+
+		int result = q / p;
+		s.push(result);
+	}
+}
